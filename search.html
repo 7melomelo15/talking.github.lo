@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Talking - 検索</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Noto Sans JP', sans-serif;
+      background: #f5f5f5;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 24px;
+      color: #007BFF;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    input, select {
+      width: 100%;
+      max-width: 360px;
+      padding: 10px;
+      margin: 10px auto;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+      display: block;
+    }
+    .card {
+      background: white;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      padding: 15px;
+      margin: 15px auto;
+      max-width: 360px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .card h2 {
+      font-size: 18px;
+      margin-bottom: 5px;
+    }
+    .card p {
+      font-size: 14px;
+      color: #555;
+    }
+    .card button {
+      margin-top: 10px;
+      background: #007BFF;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>検索</h1>
+
+  <input type="text" placeholder="名前・キーワード・タグ">
+  <select>
+    <option>並び替え：おすすめ順</option>
+    <option>評価順</option>
+    <option>価格が安い順</option>
+    <option>新着順</option>
+  </select>
+
+  <div class="card">
+    <h2>山田さん</h2>
+    <p>恋愛相談・親身に聞きます！</p>
+    <p>1500円／30分 ⭐⭐⭐⭐⭐</p>
+    <button onclick="goToReserve()">予約する</button>
+  </div>
+
+  <div class="card">
+    <h2>Sara</h2>
+    <p>英語で雑談しませんか？</p>
+    <p>1000円／30分 ⭐⭐⭐⭐</p>
+    <button onclick="goToReserve()">予約する</button>
+  </div>
+
+  <script>
+    function goToReserve() {
+      window.location.href = "reserve.html"; // I画面（予約）へ遷移
+    }
+  </script>
+
+</body>
+</html>

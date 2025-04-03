@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Talking - 新規登録</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Noto Sans JP', sans-serif;
+      background: #f5f5f5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+    }
+    h1 {
+      font-size: 24px;
+      color: #007BFF;
+      margin-bottom: 20px;
+    }
+    input {
+      width: 100%;
+      max-width: 300px;
+      padding: 10px;
+      margin: 10px 0;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+    button {
+      padding: 12px 20px;
+      font-size: 16px;
+      background: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 100%;
+      max-width: 300px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>新規登録</h1>
+
+  <input type="text" placeholder="お名前">
+  <input type="email" placeholder="メールアドレス">
+  <input type="password" placeholder="パスワード">
+
+  <button onclick="goToLogin()">登録して進む</button>
+
+  <script>
+    function goToLogin() {
+      window.location.href = "login.html"; // D画面に遷移
+    }
+  </script>
+
+</body>
+</html>
