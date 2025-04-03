@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>プロフィール詳細</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Noto Sans JP', sans-serif;
+      background: #f5f5f5;
+      padding: 20px;
+    }
+    .profile-wrapper {
+      max-width: 400px;
+      margin: auto;
+      background: white;
+      border-radius: 10px;
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .top-info {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .avatar-box {
+      position: relative;
+    }
+    .avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #ccc;
+    }
+    .status-dot {
+      position: absolute;
+      bottom: 6px;
+      right: 6px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 2px solid white;
+    }
+    .online { background: #28a745; }
+    .offline { background: #6c757d; }
+    .busy { background: #dc3545; }
+    .user-meta {
+      flex: 1;
+    }
+    .user-meta .name {
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .meta-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      margin-top: 4px;
+    }
+    .badge {
+      color: #007BFF;
+    }
+    .tags {
+      display: flex;
+      gap: 6px;
+      margin: 8px 0;
+      flex-wrap: wrap;
+    }
+    .tag {
+      background: #007BFF;
+      color: white;
+      padding: 4px 10px;
+      border-radius: 16px;
+      font-size: 12px;
+    }
+    .section {
+      font-size: 14px;
+      color: #333;
+      margin: 6px 0;
+    }
+    .gallery {
+      display: flex;
+      overflow-x: auto;
+      gap: 10px;
+      margin: 10px 0;
+    }
+    .gallery img, .gallery video {
+      width: 240px;
+      height: 140px;
+      border-radius: 8px;
+      flex-shrink: 0;
+    }
+    .actions {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin: 12px 0;
+    }
+    .actions button {
+      flex: 1;
+      padding: 10px;
+      font-size: 14px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+    }
+    .call-btn { background: #dc3545; color: white; }
+    .reserve-btn { background: #007BFF; color: white; }
+    .toggle-section {
+      margin-top: 10px;
+    }
+    .toggle-section .option-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .toggle-section .option-tab {
+      padding: 6px 12px;
+      background: #e0e0e0;
+      border-radius: 16px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .calendar {
+      font-size: 13px;
+    }
+    .calendar .day {
+      margin-bottom: 6px;
+    }
+    .calendar .available {
+      color: #28a745;
+      font-weight: bold;
+    }
+    .chat-button {
+      display: block;
+      width: 100%;
+      margin-top: 20px;
+      padding: 12px;
+      background: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="profile-wrapper">
+    <div class="top-info">
+      <div class="avatar-box">
+        <img class="avatar" src="https://placehold.co/100x100" alt="avatar">
+        <div class="status-dot online"></div>
+      </div>
+      <div class="user-meta">
+        <div class="name">山田 太郎</div>
+        <div class="meta-row">
+          <span class="badge">✅</span>
+          <span>❤️ 128</span>
+          <span>⭐️⭐️⭐️⭐️⭐️</span>
+        </div>
+        <div class="tags">
+          <div class="tag">恋愛</div>
+          <div class="tag">雑談</div>
+          <div class="tag">就活</div>
+        </div>
+        <div class="meta-row">利用者: 93人 / 通話: 832分</div>
+      </div>
+    </div>
+
+    <div class="section">最終ログイン：5時間前</div>
+    <div class="section">恋愛・仕事・人生相談まで、何でも気軽にお話ください！</div>
+
+    <div class="gallery">
+      <video src="https://www.w3schools.com/html/mov_bbb.mp4" controls></video>
+      <img src="https://placehold.co/240x140?text=Gallery1" />
+      <img src="https://placehold.co/240x140?text=Gallery2" />
+    </div>
+
+    <div class="actions">
+      <button class="call-btn" onclick="showTab('call')">📞 今すぐ通話</button>
+      <button class="reserve-btn" onclick="showTab('reserve')">📅 予約する</button>
+    </div>
+
+    <div class="toggle-section" id="call-section" style="display:none;">
+      <div class="option-tabs">
+        <div class="option-tab">恋愛相談</div>
+        <div class="option-tab">仕事の悩み</div>
+        <div class="option-tab">人生全般</div>
+      </div>
+    </div>
+
+    <div class="toggle-section" id="reserve-section" style="display:none;">
+      <div class="calendar">
+        <div class="day">4/9（火）18:00 <span class="available">●</span></div>
+        <div class="day">4/10（水）20:00 <span class="available">●</span></div>
+        <div class="day">4/11（木）21:30 <span class="available">●</span></div>
+      </div>
+    </div>
+
+    <button class="chat-button">💬 チャットする</button>
+  </div>
+
+  <script>
+    function showTab(type) {
+      document.getElementById('call-section').style.display = type === 'call' ? 'block' : 'none';
+      document.getElementById('reserve-section').style.display = type === 'reserve' ? 'block' : 'none';
+    }
+  </script>
+</body>
+</html>
