@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>統合版アプリ【超進化版】</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; font-family: 'Poppins', sans-serif; background: linear-gradient(to bottom, #0a0f2c, #1d2456); color: white; min-height: 100vh; overflow-x: hidden; }
+    .page { display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; text-align: center; }
+    .page.active { display: flex; }
+    .container { width: 100%; max-width: 400px; position: relative; }
+    .header { width: 100%; text-align: center; position: relative; margin-bottom: 20px; }
+    .menu { position: absolute; top: 0; left: 10px; font-size: 24px; color: white; cursor: pointer; z-index: 1010; }
+    .account-name { font-size: 20px; opacity: 0.7; }
+    .notification { position: absolute; top: 0; right: 10px; font-size: 24px; color: white; cursor: pointer; z-index: 1010; }
+    .side-menu { position: fixed; top: 0; left: -250px; width: 250px; height: 100%; background: #1b2347; padding: 20px; box-shadow: 2px 0 5px rgba(0,0,0,0.5); transition: 0.3s; z-index: 1005; }
+    .side-menu.active { left: 0; }
+    .side-menu p { margin: 20px 0; font-size: 18px; }
+    .profile { background: #1b2347; padding: 20px; border-radius: 20px; text-align: center; position: relative; margin-bottom: 20px; transition: background 0.3s; }
+    .profile img { width: 80px; height: 80px; border-radius: 50%; margin-bottom: 10px; object-fit: cover; }
+    .profile h2 { font-family: 'Orbitron', sans-serif; font-size: 28px; font-weight: 600; background: linear-gradient(45deg, #e0aaff, #a0cfff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 2px 2px 5px rgba(255, 200, 255, 0.6); margin: 10px 0; }
+    .profile-divider { width: 80%; border: none; border-top: 1px solid #444; margin: 20px auto; }
+    .heart { position: absolute; top: 15px; right: 15px; font-size: 20px; color: white; cursor: pointer; }
+    .tag { position: absolute; top: 15px; left: 15px; background: #e0d4ff; color: #1b2347; padding: 2px 8px; border-radius: 12px; font-size: 10px; }
+    .status-dot { position: absolute; bottom: 8px; right: 8px; width: 16px; height: 16px; border: 2px solid #1b2347; border-radius: 50%; background-color: limegreen; }
+    .status-online { background-color: limegreen; }
+    .status-offline { background-color: gray; }
+    .status-busy { background-color: red; }
+    .stats { display: flex; justify-content: space-around; margin-top: 15px; align-items: center; text-align: center; }
+    .stats div { cursor: pointer; padding: 10px; border-radius: 10px; transition: background 0.3s, padding 0.3s; }
+    .stats div:hover { background: #6b5ca5; padding-left: 20px; padding-right: 20px; }
+    .number { display: block; font-size: 18px; color: #caa5ff; }
+    .label { display: block; font-size: 12px; color: #aaa; margin-top: 2px; }
+    .stars { font-size: 18px; background: linear-gradient(45deg, #caa5ff, #8f8fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: block; margin-bottom: 2px; }
+    .archivement { font-size: 12px; color: #aaa; margin-top: 0; }
+    .section { background: #1b2347; padding: 20px; border-radius: 20px; margin-top: 20px; position: relative; }
+    .section-tag { position: absolute; top: 10px; left: 10px; background: #e0d4ff; color: #1b2347; padding: 2px 8px; border-radius: 12px; font-size: 10px; }
+    .theme-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 10px; border-bottom: 1px solid #444; transition: background 0.3s, padding 0.3s; cursor: pointer; }
+    .theme-item:hover, .theme-item.selected { background: #3d3d77; padding-left: 20px; padding-right: 20px; }
+    .theme-text { text-align: left; }
+    .theme-title { font-weight: normal; font-size: 14px; margin-bottom: 5px; }
+    .theme-desc { font-size: 11px; color: #ccc; }
+    .detail-button { background: linear-gradient(45deg, #6c63ff, #bb6bd9); border: none; border-radius: 20px; padding: 5px 15px; font-size: 11px; color: white; cursor: pointer; }
+    .charge-grid { display: flex; justify-content: center; align-items: center; text-align: center; margin-top: 10px; gap: 10px; flex-wrap: wrap; }
+    .charge-item { color: white; }
+    .charge-icon { font-size: 36px; }
+    .charge-label { font-size: 10px; color: #ccc; margin-top: 5px; text-transform: lowercase; }
+    .charge-value { font-size: 14px; color: #bbb; margin-top: 3px; }
+    .charge-symbol { font-size: 24px; color: white; }
+    .nav { display: flex; justify-content: space-around; background: #1b2347; position: fixed; bottom: 0; width: 100%; padding: 10px 0; border-top: 1px solid #333; }
+    .nav button { background: linear-gradient(45deg, #6c63ff, #bb6bd9); border: none; border-radius: 50%; width: 50px; height: 50px; font-size: 20px; color: white; cursor: pointer; }
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 8px;
+      background: linear-gradient(to right, #bb6bd9 0%, #ccc 0%);
+      border-radius: 4px;
+      outline: none;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 24px;
+      height: 24px;
+      background: #bb6bd9;
+      border: 3px solid white;
+      border-radius: 50%;
+      cursor: pointer;
+      margin-top: -8px;
+    }
+  </style>
+</head>
+<body>
+<!-- サイドメニュー -->
+<div id="sideMenu" class="side-menu">
+  <p>マイページ</p>
+  <p>設定</p>
+  <p>ログアウト</p>
+</div>
+
+<!-- トップページ -->
+<div id="page-home" class="page active">
+  <div class="container">
+
+    <!-- ヘッダー -->
+    <div class="header">
+      <div class="menu" onclick="toggleMenu()">≡</div>
+      <h1 class="account-name">@hikaru0114</h1>
+      <div class="notification" onclick="alert('通知設定へ')">🔔</div>
+    </div>
+
+    <!-- プロフィール -->
+    <div class="profile">
+      <div class="tag">profile</div>
+      <div class="heart" onclick="alert('お気に入り登録')">❤️</div>
+      <div style="position: relative; display: inline-block;">
+        <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&h=80&q=80" alt="Profile">
+        <div class="status-dot status-online"></div>
+      </div>
+      <h2>Hikaru</h2>
+      <hr class="profile-divider">
+      <div class="stats">
+        <div>
+          <span class="number">12K</span>
+          <span class="label">Streams</span>
+        </div>
+        <div>
+          <span class="number">123</span>
+          <span class="label">Followers</span>
+        </div>
+        <div>
+          <span class="stars">⭐️⭐️⭐️⭐️⭐️</span>
+          <span class="archivement">Archivement</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Themeセクション -->
+    <div class="section">
+      <div class="section-tag">theme</div>
+      <div class="section-list">
+        <div class="theme-item">
+          <div class="theme-text">
+            <div class="theme-title">01 留学</div>
+            <div class="theme-desc">アメリカとヨーロッパ留学経験あり！</div>
+          </div>
+          <button class="detail-button" onclick="openModal('studyModal')">詳細を見る</button>
+        </div>
+        <div class="theme-item">
+          <div class="theme-text">
+            <div class="theme-title">02 税務相談</div>
+            <div class="theme-desc">日独間の税務専門サポート！</div>
+          </div>
+          <button class="detail-button" onclick="openModal('taxModal')">詳細を見る</button>
+        </div>
+        <div class="theme-item">
+          <div class="theme-text">
+            <div class="theme-title">03 占い</div>
+            <div class="theme-desc">タロットと西洋占星術が得意！</div>
+          </div>
+          <button class="detail-button" onclick="openModal('fortuneModal')">詳細を見る</button>
+        </div>
+      </div>
+    </div>
+    <!-- Chargeセクション -->
+    <div class="section">
+      <div class="section-tag">charge</div>
+      <div class="charge-grid">
+        <div class="charge-item">
+          <div class="charge-icon">💰</div>
+          <div class="charge-label">charge</div>
+          <div class="charge-value">200円/分</div> <!-- ★指示①ここ修正済み -->
+        </div>
+        <div class="charge-symbol">×</div>
+        <div class="charge-item">
+          <div class="charge-icon">⌚</div>
+          <div class="charge-label">time</div>
+          <div class="charge-value" id="timeValue">5分</div> <!-- id追加 -->
+        </div>
+        <div class="charge-symbol">＝</div>
+        <div class="charge-item">
+          <div class="charge-icon">👛</div>
+          <div class="charge-label">pay</div>
+          <div class="charge-value" id="payValue">1000円</div> <!-- id追加 -->
+        </div>
+      </div>
+
+      <!-- スライダー -->
+      <div style="margin-top:20px;">
+        <input type="range" id="timeSlider" min="0" max="60" step="1" value="5" oninput="updateTime(this.value)"> <!-- ★指示②ここ修正済み -->
+      </div>
+    </div>
+
+    <!-- Reservationセクション -->
+    <div class="section">
+      <div class="section-tag">reservation</div>
+      <div style="margin-top:30px;">
+        <button class="detail-button" onclick="alert('今すぐ通話')">今すぐ通話</button>
+        <button class="detail-button" onclick="alert('予約する')">予約する</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ナビゲーションバー -->
+<div class="nav">
+  <button>🏠</button>
+  <button>🔍</button>
+  <button>➕</button>
+  <button>💬</button>
+  <button>👤</button>
+</div>
+
+<!-- モーダル -->
+<div id="studyModal" class="modal" style="display: none;">
+  <div class="modal-content">
+    <button class="close-btn" onclick="closeModal('studyModal')">×</button>
+    <h3>留学の詳細</h3>
+    <p>アメリカ・ヨーロッパへの留学経験をもとにリアルな情報提供が可能！</p>
+  </div>
+</div>
+
+<div id="taxModal" class="modal" style="display: none;">
+  <div class="modal-content">
+    <button class="close-btn" onclick="closeModal('taxModal')">×</button>
+    <h3>税務相談の詳細</h3>
+    <p>日独間の税務に精通したサポートを提供します。個人・法人対応可！</p>
+  </div>
+</div>
+
+<div id="fortuneModal" class="modal" style="display: none;">
+  <div class="modal-content">
+    <button class="close-btn" onclick="closeModal('fortuneModal')">×</button>
+    <h3>占いの詳細</h3>
+    <p>タロットと西洋占星術であなたの未来を占います！</p>
+  </div>
+</div>
+<!-- スライダー連動スクリプト -->
+<script>
+function updateTime(value) {
+  document.getElementById('timeValue').innerText = value + '分';
+  document.getElementById('payValue').innerText = (value * 200) + '円'; // ★指示③ここ実装
+  const slider = document.getElementById('timeSlider');
+  const percent = (value / 60) * 100;
+  slider.style.background = `linear-gradient(to right, #bb6bd9 ${percent}%, #ccc ${percent}%)`;
+}
+updateTime(5); // 初期表示も同期
+</script>
+
+</body>
+</html>
+
