@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>統合版アプリ【超進化版】</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; font-family: 'Poppins', sans-serif; background: linear-gradient(to bottom, #0a0f2c, #1d2456); color: white; min-height: 100vh; overflow-x: hidden; }
+    .page { display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; text-align: center; }
+    .page.active { display: flex; }
+    .container { width: 100%; max-width: 400px; position: relative; }
+    .header { width: 100%; text-align: center; position: relative; margin-bottom: 20px; }
+    .menu { position: absolute; top: 0; left: 10px; font-size: 24px; color: white; cursor: pointer; z-index: 1010; }
+    .account-name { font-size: 20px; opacity: 0.7; }
+    .notification { position: absolute; top: 0; right: 10px; font-size: 24px; color: white; cursor: pointer; z-index: 1010; }
+    .side-menu { position: fixed; top: 0; left: -250px; width: 250px; height: 100%; background: #1b2347; padding: 20px; box-shadow: 2px 0 5px rgba(0,0,0,0.5); transition: 0.3s; z-index: 1005; }
+    .side-menu.active { left: 0; }
+    .side-menu p { margin: 20px 0; font-size: 18px; }
+    .profile { background: #1b2347; padding: 20px; border-radius: 20px; text-align: center; position: relative; margin-bottom: 20px; transition: background 0.3s; }
+    .profile img { width: 80px; height: 80px; border-radius: 50%; margin-bottom: 10px; object-fit: cover; }
+    .profile h2 { font-family: 'Poppins', sans-serif; font-size: 28px; font-weight: 600; color: white; margin: 10px 0; }
+    .profile-divider { width: 80%; border: none; border-top: 1px solid #444; margin: 20px auto; }
+    .heart { position: absolute; top: 15px; right: 15px; font-size: 20px; color: white; cursor: pointer; }
+    .tag, .section-tag { 
+      position: absolute; 
+      top: 10px; 
+      left: 10px; 
+      background: #6b5ca5; 
+      color: white; 
+      padding: 4px 10px; 
+      border-radius: 12px; 
+      font-size: 12px;
+    }
+    .status-dot { position: absolute; bottom: 8px; right: 8px; width: 16px; height: 16px; border: 2px solid #1b2347; border-radius: 50%; background-color: limegreen; }
+    .status-online { background-color: limegreen; }
+    .status-offline { background-color: gray; }
+    .status-busy { background-color: red; }
+    .stats { display: flex; justify-content: space-around; margin-top: 8px; align-items: center; text-align: center; }
+    .stats div { cursor: pointer; padding: 1px; border-radius: 10px; transition: background 0.3s, padding 0.3s; }
+    .stats div:hover { background: #6b5ca5; padding-left: 20px; padding-right: 20px; }
+    .number { display: block; font-size: 18px; color: #caa5ff; margin: 1px 0; }
+    .label { display: block; font-size: 12px; color: #aaa; margin-top: 1px; }
+    .stars { font-size: 18px; background: linear-gradient(45deg, #caa5ff, #8f8fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: block; margin: 1px 0; }
+    .archivement { font-size: 12px; color: #aaa; margin-top: 1px; }
+    .section { background: #1b2347; padding: 20px; border-radius: 20px; margin-top: 20px; position: relative; }
+    .section-list { 
+      max-height: 210px; 
+      overflow-y: auto;
+      padding-top: 20px;
+      padding-right: 5px; 
+    }
+    .section-list::-webkit-scrollbar { display: none; }
+    .theme-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 10px; border-bottom: 1px solid #444; transition: background 0.3s, padding 0.3s; cursor: pointer; }
+    .theme-item:hover, .theme-item.selected { background: #3d3d77; padding-left: 20px; padding-right: 20px; }
+    .theme-text { text-align: left; }
+    .theme-title { font-weight: normal; font-size: 14px; margin-bottom: 5px; }
+    .theme-desc { font-size: 11px; color: #ccc; }
+    .detail-button { background: linear-gradient(45deg, #6c63ff, #bb6bd9); border: none; border-radius: 20px; padding: 5px 15px; font-size: 11px; color: white; cursor: pointer; }
+    .charge-grid { display: flex; justify-content: center; align-items: center; text-align: center; margin-top: 10px; gap: 10px; flex-wrap: wrap; }
+    .charge-item { color: white; }
+    .charge-icon { font-size: 36px; }
+    .charge-label { font-size: 10px; color: #ccc; margin-top: 5px; text-transform: lowercase; }
+    .charge-value { font-size: 14px; color: #bbb; margin-top: 3px; position: relative; height: 20px; overflow: hidden; }
+    .charge-symbol { font-size: 24px; color: white; }
+    .slot { height: 20px; overflow: hidden; position: relative; }
+    .slot-inner { display: flex; flex-direction: column; transition: transform 0.5s ease-out; }
+    .slot-inner div { height: 20px; line-height: 20px; font-size: 14px; }
+    .nav { display: flex; justify-content: space-around; background: #1b2347; position: fixed; bottom: 0; width: 100%; padding: 10px 0; border-top: 1px solid #333; }
+    .nav button { background: linear-gradient(45deg, #6c63ff, #bb6bd9); border: none; border-radius: 50%; width: 50px; height: 50px; font-size: 20px; color: white; cursor: pointer; }
+    input[type=range] { -webkit-appearance: none; width: 100%; height: 8px; background: linear-gradient(to right, #bb6bd9 0%, #ccc 0%); border-radius: 4px; outline: none; }
+    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 24px; height: 24px; background: #bb6bd9; border: 3px solid white; border-radius: 50%; cursor: pointer; margin-top: -8px; }
+  </style>
+</head>
+<body>
+<!-- サイドメニュー -->
+<div id="sideMenu" class="side-menu">
+  <p>ログイン/新規登録</p>
+  <p>Talkingとは？</p>
+  <p>マイページ</p>
+  <p>予約管理</p>
+  <p>設定</p>
+  <p>ログアウト</p>
+</div>
+
+<!-- トップページ -->
+<div id="page-home" class="page active">
+  <div class="container">
+
+    <!-- ヘッダー -->
+    <div class="header">
+      <div class="menu" onclick="toggleMenu()">≡</div>
+      <h1 class="account-name">@hikaru0114</h1>
+      <div class="notification" onclick="alert('通知設定へ')">🔔</div>
+    </div>
+
+    <!-- プロフィール -->
+    <div class="profile">
+      <div class="tag">プロフィール</div>
+      <div class="heart" onclick="alert('お気に入り登録')">❤</div>
+      <div style="position: relative; display: inline-block;">
+        <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&h=80&q=80" alt="Profile">
+        <div class="status-dot status-online"></div>
+      </div>
+      <h2>Hikaru</h2>
+      <hr class="profile-divider">
+      <div class="stats">
+        <div>
+          <span class="number">32</span>
+          <span class="label">通話回数</span>
+        </div>
+        <div>
+          <span class="number">123</span>
+          <span class="label">フォロワー</span>
+        </div>
+        <div>
+          <span class="stars">⭐️⭐️⭐️⭐️⭐️</span>
+          <span class="archivement">利用実績/評価レビュー</span>
+        </div>
+      </div>
+    </div>
+    <!-- テーマ -->
+    <div class="section">
+      <div class="section-tag">テーマ</div>
+      <div class="section-list" id="themeList">
+        <div class="theme-item" onclick="toggleSelect(this)">
+          <div class="theme-text">
+            <div class="theme-title">01.留学</div>
+            <div class="theme-desc">アメリカとヨーロッパ留学経験あり！</div>
+          </div>
+          <button class="detail-button" onclick="openModal('studyModal'); event.stopPropagation();">詳細を見る</button>
+        </div>
+        <div class="theme-item" onclick="toggleSelect(this)">
+          <div class="theme-text">
+            <div class="theme-title">02.税務相談</div>
+            <div class="theme-desc">日独間の税務専門サポート！</div>
+          </div>
+          <button class="detail-button" onclick="openModal('taxModal'); event.stopPropagation();">詳細を見る</button>
+        </div>
+        <div class="theme-item" onclick="toggleSelect(this)">
+          <div class="theme-text">
+            <div class="theme-title">03.占い</div>
+            <div class="theme-desc">タロットと西洋占星術が得意！</div>
+          </div>
+          <button class="detail-button" onclick="openModal('fortuneModal'); event.stopPropagation();">詳細を見る</button>
+        </div>
+        <div class="theme-item" onclick="toggleSelect(this)">
+          <div class="theme-text">
+            <div class="theme-title">04.海外旅行</div>
+            <div class="theme-desc">中央ヨーロッパの穴場スポットを紹介します！</div>
+          </div>
+          <button class="detail-button" onclick="openModal('fortuneModal'); event.stopPropagation();">詳細を見る</button>
+        </div>
+        <div class="theme-item" onclick="toggleSelect(this)">
+          <div class="theme-text">
+            <div class="theme-title">05.駐在</div>
+            <div class="theme-desc">ドイツ生活に役立つ情報がたくさん！</div>
+          </div>
+          <button class="detail-button" onclick="openModal('fortuneModal'); event.stopPropagation();">詳細を見る</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 料金 -->
+    <div class="section">
+      <div class="section-tag">料金</div>
+      <div class="charge-grid">
+        <div class="charge-item">
+          <div class="charge-icon">💰</div>
+          <div class="charge-label">単価</div>
+          <div class="charge-value">200円/分</div>
+        </div>
+        <div class="charge-symbol">×</div>
+        <div class="charge-item">
+          <div class="charge-icon">⌚</div>
+          <div class="charge-label">ご利用時間</div>
+          <div class="charge-value">
+            <div class="slot" id="timeSlot"></div>
+          </div>
+        </div>
+        <div class="charge-symbol">＝</div>
+        <div class="charge-item">
+          <div class="charge-icon">👛</div>
+          <div class="charge-label">お支払額</div>
+          <div class="charge-value">
+            <div class="slot" id="paySlot"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- スライダー -->
+      <div style="margin-top:20px;">
+        <input type="range" id="timeSlider" min="0" max="60" step="1" value="5">
+      </div>
+    </div>
+    <!-- 通話/予約 -->
+    <div class="section">
+      <div class="section-tag">通話/予約</div>
+      <div style="margin-top:30px;">
+        <button class="detail-button" id="toggleCalendarBtn" onclick="toggleCalendar()">予約する</button>
+      </div>
+
+      <!-- カレンダー表示エリア -->
+      <div id="calendarArea" style="display:none; margin-top:20px;">
+        <div id="calendar"></div>
+      </div>
+
+      <!-- 時間リスト表示エリア -->
+      <div id="timeListArea" style="display:none; margin-top:20px;">
+        <h4 id="selectedDate" style="margin-bottom:10px;"></h4>
+        <div id="timeList"></div>
+
+        <!-- 予約確認ボタン -->
+        <div id="confirmArea" style="display:none; margin-top:20px;">
+          <button class="detail-button" onclick="confirmReservation()">予約確認</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ナビゲーションバー -->
+<div class="nav">
+  <button>🏠</button>
+  <button>🔍</button>
+  <button>➕</button>
+  <button>💬</button>
+  <button>👤</button>
+</div>
+<!-- モーダル（省略） -->
+<!-- スクリプト -->
+<script>
+function toggleMenu() {
+  document.getElementById('sideMenu').classList.toggle('active');
+}
+
+function openModal(id) {
+  document.getElementById(id).style.display = 'block';
+}
+
+function closeModal(id) {
+  document.getElementById(id).style.display = 'none';
+}
+
+// スライダー用
+function generateSlot(id, items) {
+  const slot = document.getElementById(id);
+  const inner = document.createElement('div');
+  inner.className = 'slot-inner';
+  items.forEach(item => {
+    const div = document.createElement('div');
+    div.innerText = item;
+    inner.appendChild(div);
+  });
+  slot.appendChild(inner);
+}
+
+function updateSlot(id, items, value) {
+  const slot = document.querySelector(`#${id} .slot-inner`);
+  const index = items.indexOf(value);
+  const offset = index * 20;
+  slot.style.transform = `translateY(-${offset}px)`;
+}
+
+function updateTimeSlider(value) {
+  const minutes = value + '分';
+  const pay = (value * 200) + '円';
+  updateSlot('timeSlot', timeItems, minutes);
+  updateSlot('paySlot', payItems, pay);
+
+  const slider = document.getElementById('timeSlider');
+  const percent = (value / 60) * 100;
+  slider.style.background = `linear-gradient(to right, #bb6bd9 ${percent}%, #ccc ${percent}%)`;
+}
+
+const timeItems = [];
+for (let i = 0; i <= 60; i++) {
+  timeItems.push(i + '分');
+}
+const payItems = [];
+for (let i = 0; i <= 60; i++) {
+  payItems.push((i * 200) + '円');
+}
+
+generateSlot('timeSlot', timeItems);
+generateSlot('paySlot', payItems);
+
+document.getElementById('timeSlider').addEventListener('input', function() {
+  updateTimeSlider(parseInt(this.value));
+});
+
+updateTimeSlider(5);
+// 仮のオンライン予定データ
+const onlineSchedule = {
+  '2025-04-10': ['09:00', '13:00', '20:00'],
+  '2025-04-11': ['10:00', '15:00', '18:00'],
+  '2025-04-12': ['08:00', '11:00', '19:00'],
+};
+
+// カレンダー開閉＋ボタン切替
+function toggleCalendar() {
+  const area = document.getElementById('calendarArea');
+  const button = document.getElementById('toggleCalendarBtn');
+  
+  if (area.style.display === 'none') {
+    area.style.display = 'block';
+    button.innerText = '戻る';
+    drawCalendar(new Date());
+  } else {
+    area.style.display = 'none';
+    button.innerText = '予約する';
+    document.getElementById('timeListArea').style.display = 'none';
+  }
+}
+
+let selectedDayDiv = null;
+
+// カレンダー描画
+function drawCalendar(date) {
+  const calendar = document.getElementById('calendar');
+  calendar.innerHTML = '';
+
+  const year = date.getFullYear();
+  const month = date.getMonth();
+
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  const startDay = firstDay.getDay();
+  const totalDays = lastDay.getDate();
+
+  // 月タイトル
+  const title = document.createElement('div');
+  title.innerHTML = `${year}年 ${month + 1}月`;
+  title.style.marginBottom = '10px';
+  title.style.fontWeight = 'bold';
+  calendar.appendChild(title);
+
+  // 曜日ラベル
+  const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const weekRow = document.createElement('div');
+  weekRow.style.display = 'grid';
+  weekRow.style.gridTemplateColumns = 'repeat(7, 1fr)';
+  weekRow.style.marginBottom = '5px';
+  weekdays.forEach(day => {
+    const wd = document.createElement('div');
+    wd.innerText = day;
+    wd.style.fontSize = '12px';
+    wd.style.color = '#ccc';
+    wd.style.textAlign = 'center';
+    weekRow.appendChild(wd);
+  });
+  calendar.appendChild(weekRow);
+  // 日付グリッド
+  const grid = document.createElement('div');
+  grid.style.display = 'grid';
+  grid.style.gridTemplateColumns = 'repeat(7, 1fr)';
+  grid.style.gap = '5px';
+
+  // 空白
+  for (let i = 0; i < (startDay + 6) % 7; i++) {
+    const empty = document.createElement('div');
+    grid.appendChild(empty);
+  }
+
+  // 日付
+  for (let d = 1; d <= totalDays; d++) {
+    const day = document.createElement('div');
+    day.innerText = d;
+    day.style.padding = '10px 0';
+    day.style.background = '#2d2f50';
+    day.style.borderRadius = '10px';
+    day.style.cursor = 'pointer';
+    day.style.position = 'relative';
+    day.style.textAlign = 'center';
+
+    const fullDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    if (onlineSchedule[fullDate]) {
+      const dot = document.createElement('div');
+      dot.style.width = '8px';
+      dot.style.height = '8px';
+      dot.style.background = 'limegreen';
+      dot.style.borderRadius = '50%';
+      dot.style.position = 'absolute';
+      dot.style.bottom = '5px';
+      dot.style.left = '50%';
+      dot.style.transform = 'translateX(-50%)';
+      day.appendChild(dot);
+    }
+
+    day.onclick = () => {
+      if (selectedDayDiv) {
+        selectedDayDiv.style.background = '#2d2f50';
+      }
+      day.style.background = 'linear-gradient(45deg, #6c63ff, #bb6bd9)';
+      selectedDayDiv = day;
+      showTimeList(fullDate);
+    };
+
+    grid.appendChild(day);
+  }
+
+  calendar.appendChild(grid);
+}
+// 日付クリック → 時間リスト表示
+function showTimeList(date) {
+  const timeListArea = document.getElementById('timeListArea');
+  const selectedDate = document.getElementById('selectedDate');
+  const timeList = document.getElementById('timeList');
+  const confirmArea = document.getElementById('confirmArea');
+
+  selectedDate.innerText = `${date} の時間帯を選択`;
+  timeList.innerHTML = '';
+  confirmArea.style.display = 'none'; // 予約ボタンを初期非表示
+
+  for (let hour = 0; hour < 24; hour++) {
+    const hourText = `${String(hour).padStart(2, '0')}:00～${String(hour + 1).padStart(2, '0')}:00`;
+
+    const div = document.createElement('div');
+    div.innerText = hourText;
+    div.style.padding = '10px';
+    div.style.marginBottom = '5px';
+    div.style.borderRadius = '8px';
+    div.style.textAlign = 'center';
+    div.style.position = 'relative';
+
+    const schedule = onlineSchedule[date] || [];
+
+    if (schedule.includes(`${String(hour).padStart(2, '0')}:00`)) {
+      // オンライン可
+      div.style.background = '#2d2f50';
+      div.style.cursor = 'pointer';
+      div.onmouseover = () => div.style.background = '#3d3d77';
+      div.onmouseout = () => div.style.background = '#2d2f50';
+      div.onclick = () => {
+        document.querySelectorAll('#timeList div').forEach(el => {
+          if (el.style.background.includes('gradient')) {
+            el.style.background = '#2d2f50';
+          }
+        });
+        div.style.background = 'linear-gradient(45deg, #6c63ff, #bb6bd9)';
+        confirmArea.style.display = 'block';
+      };
+
+      const dot = document.createElement('div');
+      dot.style.width = '10px';
+      dot.style.height = '10px';
+      dot.style.background = 'limegreen';
+      dot.style.borderRadius = '50%';
+      dot.style.position = 'absolute';
+      dot.style.left = '10px';
+      dot.style.top = '50%';
+      dot.style.transform = 'translateY(-50%)';
+      div.appendChild(dot);
+    } else {
+      // オンライン不可
+      div.style.background = '#555';
+      div.style.opacity = '0.5';
+      div.style.cursor = 'default';
+
+      const cross = document.createElement('div');
+      cross.innerText = '✕';
+      cross.style.position = 'absolute';
+      cross.style.left = '10px';
+      cross.style.top = '50%';
+      cross.style.transform = 'translateY(-50%)';
+      cross.style.color = 'white';
+      cross.style.fontSize = '14px';
+      div.appendChild(cross);
+    }
+
+    timeList.appendChild(div);
+  }
+
+  timeListArea.style.display = 'block';
+}
+// 予約確認処理
+function confirmReservation() {
+  alert('予約が確定しました！');
+}
+</script>
+
+</body>
+</html>
