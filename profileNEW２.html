@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Talking</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Briem+Hand&display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; font-family: 'Poppins', sans-serif; background: #ffffff; color: #333; min-height: 100vh; overflow-x: hidden; }
+    .page { display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; text-align: center; }
+    .page.active { display: flex; }
+    .container { width: 100%; max-width: 400px; position: relative; }
+    .header { width: 100%; text-align: center; position: relative; margin-bottom: 5px;
+  display: flex;              /* ★追加！ */
+  align-items: center;        /* ★縦中央揃え！ */
+  justify-content: center;    /* ★横中央揃え！ */}
+    .menu { position: absolute; top: 0; left: 10px; font-size: 28px; color: #333; cursor: pointer; z-index: 1010; }
+    .account-name { font-size: 30px; opacity: 0.7; font-family: 'Briem Hand', sans-serif; background: linear-gradient(90deg, #4dd0e1, #0071E3);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent; margin: 0;            /* ★上下の余白をなくす */
+  line-height: 1;       /* ★行の高さもきっちり詰める */
+  display: flex;
+  align-items: center;  /* ★中身（文字）を中央寄せする */
+  justify-content: center;
+  height: 40px;         /* ★高さを固定して、三重線＆？マークと合わせる */
+}
+
+    /* ▼ ハートボタン（枠なし、中だけ色変化） */
+    .follow-button {
+      position: absolute;
+      top: 10px;
+      right: 50px;
+      width: 32px;
+      height: 32px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .follow-button svg {
+      width: 24px;
+      height: 24px;
+      fill: white;
+      stroke: #ff0000;
+      stroke-width: 2;
+      transition: 0.3s;
+    }
+    .followed svg {
+      fill: #ff0000;
+      stroke: #ff0000;
+    }
+
+    /* ▼ 通知ベルアイコン */
+    .notification {
+      position: absolute;
+      top: 0;
+      right: 10px;
+      font-size: 24px;
+      color: #0071E3;
+      cursor: pointer;
+      z-index: 1010;
+      display: flex;
+      align-items: center;
+    }
+    .notification svg { width: 28px; height: 28px; stroke: #0071E3; }
+
+    .side-menu { position: fixed; top: 0; left: -250px; width: 250px; height: 100%; background: #e0f7fa; padding: 20px; box-shadow: 2px 0 5px rgba(0,0,0,0.2); transition: 0.3s; z-index: 1005; }
+    .side-menu.active { left: 0; }
+    .side-menu p { margin: 20px 0; font-size: 18px; }
+    /* ▼ プロフィールセクション背景グラデーション */
+    .profile {
+      background: linear-gradient(to bottom, #EAF6FF, #FFFFFF);
+      padding: 20px;
+      border-radius: 20px;
+      text-align: center;
+      position: relative;
+      margin-bottom: 20px;
+      transition: background 0.3s;
+    }
+    .profile img { width: 80px; height: 80px; border-radius: 50%; margin-bottom: 10px; object-fit: cover; }
+    .profile h2 { font-family: 'SF Pro Display', sans-serif; font-size: 28px; font-weight: 600; color: #1D3B59; margin: 10px 0; }
+    .profile-divider { width: 80%; border: none; border-top: 1px solid #ccc; margin: 20px auto; }
+
+    .tag, .section-tag {
+      position: absolute;
+      top: 5px;
+      left: 10px;
+      background: #0071E3;
+      color: #ffffff;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-family: 'SF Pro Text', sans-serif;
+      border: 2px solid #0071E3;
+    }
+
+    .status-dot { position: absolute; bottom: 8px; right: 8px; width: 16px; height: 16px; border: 2px solid #e0f7fa; border-radius: 50%; background-color: limegreen; }
+    .status-online { background-color: limegreen; }
+    .status-offline { background-color: gray; }
+    .status-busy { background-color: red; }
+
+    .stats { display: flex; justify-content: space-around; margin-top: 8px; align-items: center; text-align: center; }
+    .stats div { cursor: pointer; padding: 1px; border-radius: 10px; transition: background 0.3s, padding 0.3s; font-family: 'SF Pro Text', sans-serif; color: #6E6E73; }
+    .stats div:hover { background: #bbdaf2; padding-left: 20px; padding-right: 20px; }
+    .number { display: block; font-size: 18px; color: #0071E3; margin: 1px 0; font-family: 'SF Pro Text', sans-serif; font-weight: normal; /* ★追加★ */}
+    .label { display: block; font-size: 12px; color: #6E6E73; margin-top: 1px; font-family: 'SF Pro Text', sans-serif; }
+
+
+    .star-rating {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* ★これ追加！中央に寄せる */
+  gap: 3px; /* ★星同士の隙間を少し狭く */
+  margin: 1px; /* ★margin-topいらない。ピタッと揃える */
+}
+
+.star {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  background: linear-gradient(270deg, #4dd0e1, #0071E3, #4dd0e1);
+  background-size: 600% 600%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: moveGradient 4s linear infinite;
+  font-size: 20px;
+}
+
+.star.empty {
+  background: #ccc;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: #ccc;
+}
+
+.star.half {
+  background: linear-gradient(90deg, 
+    #4dd0e1 50%, 
+    #ccc 50%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: 200% 100%;
+  background-position: left;
+}
+
+/* 流れるアニメーション */
+@keyframes moveGradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+
+    .archivement { font-size: 12px; color: #6E6E73; margin-top: 1px; font-family: 'SF Pro Text', sans-serif; }
+    /* ▼ セクション共通背景グラデーション */
+    .section {
+      background: linear-gradient(to bottom, #EAF6FF, #FFFFFF);
+      padding: 20px;
+      border-radius: 20px;
+      margin-top: 20px;
+      position: relative;
+    }
+    .section-list { max-height: 210px; overflow-y: auto; padding-top: 20px; padding-right: 5px; }
+    .section-list::-webkit-scrollbar { display: none; }
+    .theme-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 10px; border-bottom: 1px solid #ccc; transition: background 0.3s, padding 0.3s; cursor: pointer; font-family: 'SF Pro Text', sans-serif; color: #0071E3; }
+    .theme-item:hover, .theme-item.selected { background: #bbdaf2; padding-left: 20px; padding-right: 20px; }
+    .theme-text { text-align: left; }
+    .theme-title { font-weight: normal; font-size: 14px; margin-bottom: 5px; font-family: 'SF Pro Text', sans-serif; color: #0071E3; }
+    .theme-desc { font-size: 11px; color: #6E6E73; font-family: 'SF Pro Text', sans-serif; }
+
+    .detail-button {
+      background: #0071E3;
+      color: #ffffff;
+      padding: 6px 12px;
+      border: 2px solid #0071E3;
+      border-radius: 12px;
+      font-size: 12px;
+      font-family: 'SF Pro Text', sans-serif;
+      cursor: pointer;
+    }
+
+    /* ▼ 料金セクション関係 */
+    .charge-grid { display: flex; justify-content: center; align-items: center; text-align: center; margin-top: 10px; gap: 10px; flex-wrap: wrap; }
+    .charge-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #333; min-width: 80px; font-family: 'SF Pro Text', sans-serif; }
+
+.charge-item:hover {
+  background:  #bbdaf2; /* ← うすい青背景にする */
+  border-radius: 12px; /* ← 角を丸める */
+  box-shadow: 0 4px 8px rgba(0, 113, 227, 0.2); /* ← ちょっとだけ影をつける */
+  transition: 0.3s; /* ← なめらかに */
+}
+    .charge-icon { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; }
+    .charge-label { font-size: 11px; color: #6E6E73; margin-top: 5px; font-family: 'SF Pro Text', sans-serif; }
+    .charge-value { font-size: 14px; color: #6E6E73; margin-top: 5px; font-family: 'SF Pro Text', sans-serif; }
+    .charge-symbol { font-size: 28px; color: #6E6E73; line-height: 1; font-family: 'SF Pro Text', sans-serif; }
+    .slot { height: 20px; overflow: hidden; position: relative; }
+.slot-inner {
+  display: flex;
+  flex-direction: column-reverse; /* ←これにする */
+  transition: transform 0.5s ease-out;
+}
+.slot-inner div {
+  height: 20px;
+  line-height: 20px;
+  font-size: 14px;
+  color: #6E6E73;
+  font-family: 'SF Pro Text', sans-serif;
+  transform: none; /* ←こっちも回転しない！消す！ */
+}
+    /* 時計アイコン（針の色だけ#0071E3に） */
+    .charge-icon svg line {
+      stroke: #0071E3;
+    }
+
+    /* ▼ 通話・予約ボタン（今すぐ通話＝濃いピンク） */
+    .call-button {
+  padding: 12px 24px;
+  font-size: 14px;
+  background: #ffffff;        /* 初期：白背景 */
+  border: 2px solid #D1495B;  /* 赤枠 */
+  color: #D1495B;             /* 赤文字 */
+  border-radius: 12px;
+  width: 40%;
+  cursor: pointer;
+  font-family: 'SF Pro Text', sans-serif;
+  transition: 0.2s;
+}
+
+/* 押してトグルON（選択中）のデザイン */
+.call-button.active {
+  background: #D1495B;        /* 赤背景 */
+  color: #ffffff;             /* 白文字 */
+}
+
+    .reserve-button {
+      padding: 12px 24px;
+      font-size: 14px;
+      background: #0071E3;
+      border: 2px solid #0071E3;
+      color: #ffffff;
+      border-radius: 12px;
+      width: 40%;
+      cursor: pointer;
+      font-family: 'SF Pro Text', sans-serif;
+    }
+    /* ▼ 料金スライダー（添付画像通り） */
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 8px;
+      background: linear-gradient(to right, #4dd0e1 0%, #0071E3 100%) no-repeat, #e0e0e0; 
+      background-size: 30% 100%; /* ←最初の青色エリアの長さ */
+      background-repeat: no-repeat;
+      border-radius: 4px;
+      outline: none;
+      margin-top: 20px;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 24px;
+      height: 24px;
+      background: #0071E3;
+      border: 4px solid #ffffff;
+      border-radius: 50%;
+      cursor: pointer;
+      margin-top: -8px;
+      box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+    }
+    input[type=range]::-moz-range-thumb {
+      width: 24px;
+      height: 24px;
+      background: #0071E3;
+      border: 4px solid #ffffff;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+    }
+
+    /* ▼ ナビゲーションバー ▼ */
+    .nav {
+      display: flex;
+      justify-content: space-around;
+      background: #EAF6FF;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      padding: 10px 0;
+      border-top: 1px solid #ccc;
+    }
+
+    .nav button {
+      background: #0071E3;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      font-size: 20px;
+      color: white;
+      cursor: pointer;
+    }
+
+    /* ▼ レスポンシブ調整 ▼ */
+    @media (max-width: 768px) {
+      .container {
+        max-width: 100%;
+        padding: 10px;
+      }
+    }
+    @media (max-width: 480px) {
+      .profile img {
+        width: 60px;
+        height: 60px;
+      }
+      .nav button {
+        width: 40px;
+        height: 40px;
+      }
+    }
+/* ▼ プロフィール用ハート＆ベル配置 */
+.profile-icons {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  gap: 10px;
+}
+
+.icon-button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-button svg {
+  width: 24px;
+  height: 24px;
+  stroke: #0071E3; /* 最初の線の色（ハートは赤に設定してる） */
+  fill: white;     /* 中は白＝透明みたいな感じ */
+  transition: 0.3s;
+}
+#followButton svg {
+  stroke: #ff0000;
+}
+
+/* ハート押した後 */
+.followed svg {
+  fill: #ff0000;
+  stroke: #ff0000;
+}
+
+/* ベル押した後 */
+.notified svg {
+  fill: #0071E3;
+  stroke: #0071E3;
+}
+@keyframes flash {
+  0% { color: #6E6E73; }
+  50% { color: #0071E3; }
+  100% { color: #6E6E73; }
+}
+
+.flash {
+  animation: flash 0.6s ease;
+}
+
+/* ▼ 時間帯リストを3列だけ表示して、スクロールできるようにする ▼ */
+#timeList {
+  max-height: 180px;           /* 180pxだけ高さを許す（60px × 3行） */
+  overflow-y: scroll;          /* 縦スクロールを有効にする */
+  -ms-overflow-style: none;    /* （IE/Edge用）スクロールバーを非表示 */
+  scrollbar-width: none;       /* （Firefox用）スクロールバーを非表示 */
+}
+
+/* ▼ Chrome/Safariでスクロールバーを消す */
+#timeList::-webkit-scrollbar {
+  display: none;
+}
+
+/* ▼ 分スライダー用デザイン */
+.minute-slider {
+  margin-top: 10px;
+}
+
+.slider {
+  width: 90%;
+  margin-top: 10px;
+}
+
+.minute-display {
+  font-size: 14px;
+  color: #0071E3;
+  margin-top: 5px;
+}
+
+input.no-thumb::-webkit-slider-thumb {
+  width: 0;
+  height: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+input.no-thumb::-moz-range-thumb {
+  width: 0;
+  height: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+/* 目盛り用スタイル */
+.slider-ticks {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 5px;
+  font-size: 12px;
+  color: #6E6E73; /* グレー */
+  padding: 0 5px;
+}
+
+/* ▼ ？マークボタン（ヘルプボタン）追加 ▼ */
+.help-button {
+  position: absolute;
+  top: 5px;
+  right: 10px; /* ベルよりさらに右上に設置 */
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  z-index: 1015; /* 他より前面に出す */
+}
+
+.help-button svg {
+  width: 36px;
+  height: 36px;
+}
+
+@media (max-width: 480px) {
+
+  /* ① 評価レビューの⭐️を小さくする */
+  .star-rating {
+    gap: 2px;           /* 星と星の間をさらに狭く */
+    transform: scale(0.8); /* 星全体を80%に縮小 */
+  }
+
+  /* ② 料金セクション（三つを縦並び＝一列にする） */
+  .charge-grid {
+    flex-direction: column; /* 横並び→縦並びに変更 */
+    align-items: center;    /* 中央寄せ */
+  }
+  .charge-symbol {
+    display: none; /* × と ＝ は邪魔なので消す */
+  }
+
+  /* ③ ヘッダー（Talkingロゴ）中央揃え調整 */
+  .header {
+    justify-content: center; /* 常に中央揃え */
+  }
+  .menu {
+    left: 10px;
+  }
+  .help-button {
+    right: 10px;
+  }
+}
+  </style>
+</head>
+<body>
+<!-- サイドメニュー -->
+
+
+<!-- トップページ -->
+<div id="page-home" class="page active">
+  <div class="container">
+
+    <!-- ヘッダー -->
+    <div class="header">
+      <div class="menu">≡</div>
+      <h1 class="account-name animated-gradient">Talking</h1>
+<button class="help-button" onclick="openHelp()">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" stroke="none">
+    <circle cx="12" cy="12" r="12" fill="#0071E3"/>
+    <text x="12" y="16" text-anchor="middle" font-size="16" fill="white" font-family="Arial, sans-serif">?</text>
+  </svg>
+</button>
+      </div>
+    <!-- プロフィール -->
+    <div class="profile">
+<div class="profile-icons">
+  <!-- ハートボタン -->
+  <button class="icon-button" id="followButton" onclick="toggleFollow()">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" stroke="#ff0000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 
+               2 5.42 4.42 3 7.5 3 
+               c1.74 0 3.41 0.81 4.5 2.09 
+               C13.09 3.81 14.76 3 16.5 3 
+               19.58 3 22 5.42 22 8.5 
+               c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+    </svg>
+  </button>
+
+  <!-- ベルボタン -->
+  <button class="icon-button" id="notificationButton" onclick="toggleNotification()">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" stroke="#0071E3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path>
+      <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+    </svg>
+  </button>
+</div>
+      <div class="tag">プロフィール</div>
+      <div style="position: relative; display: inline-block;">
+        <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&h=80&q=80" alt="Profile">
+        <div class="status-dot status-online"></div>
+      </div>
+      <h2>Hikaru</h2>
+      <hr class="profile-divider">
+      <div class="stats">
+        <div>
+          <span class="number">999</span>
+          <span class="label">フォロワー</span>
+        </div>
+        <div>
+          <div class="star-rating" id="starRating"></div> <!-- ←ここでJSで動的に星を描画する -->
+          <span class="archivement">評価レビュー</span>
+        </div>
+        <div>
+          <span class="number">99</span>
+          <span class="label">通話回数</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- テーマ -->
+    <div class="section">
+      <div class="section-tag">テーマ</div>
+      <div class="section-list" id="themeList">
+        <div class="theme-item" onclick="toggleSelect(this)">
+          <div class="theme-text">
+            <div class="theme-title">留学</div>
+            <div class="theme-desc">アメリカとヨーロッパ留学経験あり！</div>
+          </div>
+          <button class="detail-button" onclick="openModal('studyModal'); event.stopPropagation();">詳細を見る</button>
+        </div>
+        <div class="theme-item" onclick="toggleSelect(this)">
+          <div class="theme-text">
+            <div class="theme-title">税務相談</div>
+            <div class="theme-desc">日独間の税務専門サポート！</div>
+          </div>
+          <button class="detail-button" onclick="openModal('taxModal'); event.stopPropagation();">詳細を見る</button>
+        </div>
+        <div class="theme-item" onclick="toggleSelect(this)">
+          <div class="theme-text">
+            <div class="theme-title">占い</div>
+            <div class="theme-desc">タロットと西洋占星術が得意！</div>
+          </div>
+          <button class="detail-button" onclick="openModal('fortuneModal'); event.stopPropagation();">詳細を見る</button>
+        </div>
+        <div class="theme-item" onclick="toggleSelect(this)">
+          <div class="theme-text">
+            <div class="theme-title">海外旅行</div>
+            <div class="theme-desc">ヨーロッパの穴場スポットを紹介！</div>
+          </div>
+          <button class="detail-button" onclick="openModal('travelModal'); event.stopPropagation();">詳細を見る</button>
+        </div>
+        <div class="theme-item" onclick="toggleSelect(this)">
+          <div class="theme-text">
+            <div class="theme-title">駐在</div>
+            <div class="theme-desc">ドイツ生活で役立つ情報がたくさん！</div>
+          </div>
+          <button class="detail-button" onclick="openModal('expatModal'); event.stopPropagation();">詳細を見る</button>
+        </div>
+      </div>
+    </div>
+    <!-- 料金 -->
+    <div class="section">
+      <div class="section-tag">料金</div>
+      <div class="charge-grid">
+        <div class="charge-item">
+          <div class="charge-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 48" width="100%" height="100%">
+              <rect x="2" y="2" width="60" height="44" rx="6" ry="6" stroke="#333" stroke-width="1" fill="none"></rect>
+              <rect x="6" y="6" width="52" height="36" rx="4" ry="4" stroke="#333" stroke-width="0.5" fill="none"></rect>
+              <circle cx="14" cy="14" r="3" stroke="#333" stroke-width="1" fill="none"></circle>
+              <text x="32" y="30" text-anchor="middle" font-size="20" fill="#333" font-family="Arial, sans-serif">¥</text>
+            </svg>
+          </div>
+          <div class="charge-label">単価（分）</div>
+          <div class="charge-value">200円</div>
+        </div>
+        <div class="charge-symbol">×</div>
+        <div class="charge-item">
+          <div class="charge-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="100%" height="100%">
+              <circle cx="12" cy="12" r="10" stroke="#333" stroke-width="1" fill="none" />
+              <line x1="12" y1="12" x2="12" y2="7" stroke="#0071E3" stroke-width="1.5" stroke-linecap="round" />
+              <line x1="12" y1="12" x2="16" y2="12" stroke="#0071E3" stroke-width="1.5" stroke-linecap="round" />
+            </svg>
+          </div>
+          <div class="charge-label">ご利用時間</div>
+          <div class="charge-value">
+            <div class="slot" id="timeSlot"></div>
+          </div>
+        </div>
+        <div class="charge-symbol">＝</div>
+        <div class="charge-item">
+          <div class="charge-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 48" fill="none" width="100%" height="100%">
+              <rect x="2" y="4" width="60" height="40" rx="4" ry="4" stroke="#333" stroke-width="2" fill="none"></rect>
+              <rect x="10" y="16" width="12" height="8" rx="1" ry="1" fill="#FFD700" stroke="#FFD700" stroke-width="1"></rect>
+              <line x1="2" y1="16" x2="62" y2="16" stroke="#333" stroke-width="2"></line>
+            </svg>
+          </div>
+          <div class="charge-label">お支払額</div>
+          <div class="charge-value">
+            <div class="slot" id="paySlot"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- スライダー -->
+      <div>
+        <input type="range" id="timeSlider" min="1" max="60" step="1" value="1">
+        <!-- ここに目盛りを追加 -->
+         <div class="slider-ticks">
+         <span>0</span>
+         <span>10</span>
+         <span>20</span>
+         <span>30</span>
+         <span>40</span>
+         <span>50</span>
+         <span>60</span>
+       </div>
+      </div>
+    </div>
+    <!-- 通話/予約 -->
+    <div class="section">
+      <div class="section-tag">通話/予約</div>
+      <div style="margin-top:30px; display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+        <button class="call-button" onclick="toggleCallButton()">今すぐ通話</button>
+        <button class="reserve-button" id="toggleCalendarBtn" onclick="toggleCalendar()">予約する</button>
+      </div>
+
+      <!-- カレンダーエリア・時間リスト -->
+      <div id="calendarArea" style="display:none; margin-top:20px;">
+        <div id="calendar"></div>
+      </div>
+      <div id="timeListArea" style="display:none; margin-top:20px;">
+        <h4 id="selectedDate" style="margin-bottom:10px;"></h4>
+        <div id="timeList"></div>
+        <div id="confirmArea" style="display:none; margin-top:20px;">
+          <button class="detail-button" onclick="confirmReservation()">オファーする</button>
+        </div>
+      </div>
+    </div>
+
+  </div> <!-- container end -->
+</div> <!-- page-home end -->
+
+<!-- チャットするボタン -->
+<div style="display: flex; justify-content: center; margin: 30px 0;">
+  <button style="
+    width: 85%;
+    padding: 12px 20px;
+    font-size: 16px;
+    color: #0071E3;
+    background: white;
+    border: 2px solid #0071E3;
+    border-radius: 12px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+  " onclick="startChat()">チャットする</button>
+</div>
+
+<!-- ナビゲーションバー -->
+<div class="nav">
+  <button><img src="home-icon.svg" alt="ホーム" style="width:24px; height:24px;"></button>
+  <button><img src="search-icon.svg" alt="検索" style="width:24px; height:24px;"></button>
+  <button><img src="plus-icon.svg" alt="追加" style="width:24px; height:24px;"></button>
+  <button><img src="chat-icon.svg" alt="チャット" style="width:24px; height:24px;"></button>
+  <button><img src="user-icon.svg" alt="マイページ" style="width:24px; height:24px;"></button>
+</div>
+<!-- スクリプト -->
+<script>
+let selectedTimeDiv = null;
+function toggleMenu() {
+  document.getElementById('sideMenu').classList.toggle('active');
+}
+
+
+
+// ♡ハートボタンクリック（色変化）
+function toggleFollow() {
+  const button = document.getElementById('followButton');
+  button.classList.toggle('followed');
+  const followerNumber = document.querySelector('.number'); // ← フォロワー数の場所を取る
+  let currentFollowers = parseInt(followerNumber.textContent);
+
+  if (button.classList.contains('followed')) {
+    followerNumber.textContent = currentFollowers + 1; // フォローしたら＋1
+  } else {
+    followerNumber.textContent = currentFollowers - 1; // フォロー解除したら−1
+}
+}
+
+function toggleNotification() {
+  const button = document.getElementById('notificationButton');
+  button.classList.toggle('notified');
+}
+
+// スロット生成・更新
+function generateSlot(id, items) {
+  const slot = document.getElementById(id);
+  slot.innerHTML = '';  // ← まず一旦中身クリア！これ超重要
+  const inner = document.createElement('div');
+  inner.className = 'slot-inner';
+  items.forEach(item => {
+    const div = document.createElement('div');
+    div.innerText = item;
+    inner.appendChild(div);
+  });
+  slot.appendChild(inner); // ← ちゃんと slot の中に inner を入れる
+}
+
+function updateSlot(id, items, value) {
+  const slot = document.querySelector(`#${id} .slot-inner`);
+  const index = items.indexOf(value);
+  if (index === -1) return;
+  const offset = (items.length - 1 - index) * 20;  // ←ここを変える！
+  slot.style.transform = `translateY(${-offset}px)`;
+}
+
+function updateTimeSlider(value) {
+  const minutes = value + '分';
+  const pay = (value * 200) + '円';
+  updateSlot('timeSlot', timeItems, minutes);
+  updateSlot('paySlot', payItems, pay);
+
+  const slider = document.getElementById('timeSlider');
+  const percent = (value / 60) * 100;
+  slider.style.background = `linear-gradient(
+  to right,
+  #4dd0e1 0%,      /* 最初は水色 */
+  #0071E3 ${percent}%, /* 指定位置までグラデーション */
+  #e0e0e0 ${percent}%, /* そこから急にグレー */
+  #e0e0e0 100%    /* 最後までグレー */
+)`;
+}
+
+function flashPay() {
+  const paySlot = document.getElementById('paySlot');
+  const slotInner = paySlot.querySelector('.slot-inner');
+  
+  // アニメーションリセット（一回クラスを外す）
+  slotInner.classList.remove('flash');
+  
+  // 強制的に再描画 → これでアニメーションがもう一回走る
+  void slotInner.offsetWidth;
+  
+  // もう一回クラスを付け直す
+  slotInner.classList.add('flash');
+}
+
+const timeItems = [];
+const payItems = [];
+for (let i = 0; i <= 60; i++) {   // ←昇順！
+  timeItems.push(i + '分');
+  payItems.push((i * 200) + '円');
+}
+
+// スロット生成
+generateSlot('timeSlot', timeItems);
+generateSlot('paySlot', payItems);
+
+// ★ここでスライダーとスロットを一発で正しく初期化する！
+updateTimeSlider(1);
+
+// スライダーにリスナー追加
+document.getElementById('timeSlider').addEventListener('input', function() {
+  updateTimeSlider(parseInt(this.value));
+});
+
+// 仮のオンライン予定データ
+const onlineSchedule = {
+  '2025-04-10': ['09:00', '13:00', '20:00'],
+  '2025-04-11': ['10:00', '15:00', '18:00'],
+  '2025-04-12': ['08:00', '11:00', '19:00'],
+};
+
+// カレンダー開閉
+function toggleCalendar() {
+  const area = document.getElementById('calendarArea');
+  const button = document.getElementById('toggleCalendarBtn');
+  const callButton = document.querySelector('.call-button');
+
+if (area.style.display === 'none') {
+  area.style.display = 'block';
+  button.innerText = '戻る';
+  drawCalendar(new Date());
+
+  // カレンダー開いたとき：ボタンをグレーにして無効化
+  callButton.disabled = true;
+  callButton.style.background = '#cccccc'; // ← グレー背景
+  callButton.style.color = '#ffffff';      // ← 白文字
+  callButton.style.border = '2px solid #cccccc'; // ← 枠線もグレー
+  callButton.style.cursor = 'not-allowed';
+} else {
+  area.style.display = 'none';
+  button.innerText = '予約する';
+  document.getElementById('timeListArea').style.display = 'none';
+
+  // カレンダー閉じたとき：ボタンを元のデザインに戻す
+  callButton.disabled = false;
+  callButton.style.background = '#ffffff'; 
+  callButton.style.color = '#D1495B';
+  callButton.style.border = '2px solid #D1495B';
+  callButton.style.cursor = 'pointer';
+}
+}
+
+let selectedDayDiv = null;
+
+// カレンダー描画
+function drawCalendar(date) {
+  const calendar = document.getElementById('calendar');
+  calendar.innerHTML = '';
+
+  const year = date.getFullYear();
+  const month = date.getMonth();
+
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  const startDay = firstDay.getDay();
+  const totalDays = lastDay.getDate();
+
+  const title = document.createElement('div');
+  title.innerHTML = `${year}年 ${month + 1}月`;
+  title.style.marginBottom = '10px';
+  title.style.fontWeight = 'bold';
+  calendar.appendChild(title);
+
+  const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const weekRow = document.createElement('div');
+  weekRow.style.display = 'grid';
+  weekRow.style.gridTemplateColumns = 'repeat(7, 1fr)';
+  weekRow.style.marginBottom = '5px';
+  weekdays.forEach(day => {
+    const wd = document.createElement('div');
+    wd.innerText = day;
+    wd.style.fontSize = '12px';
+    wd.style.color = '#666';
+    wd.style.textAlign = 'center';
+    weekRow.appendChild(wd);
+  });
+  calendar.appendChild(weekRow);
+
+  const grid = document.createElement('div');
+  grid.style.display = 'grid';
+  grid.style.gridTemplateColumns = 'repeat(7, 1fr)';
+  grid.style.gap = '5px';
+
+  for (let i = 0; i < (startDay + 6) % 7; i++) {
+    const empty = document.createElement('div');
+    grid.appendChild(empty);
+  }
+
+for (let d = 1; d <= totalDays; d++) {
+  const day = document.createElement('div');
+  day.innerText = d;
+  day.style.padding = '10px 0';
+  day.style.borderRadius = '10px';
+  day.style.position = 'relative';
+  day.style.textAlign = 'center';
+
+  const fullDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+
+  if (onlineSchedule[fullDate]) {
+    // ★オンライン予定あり：色を #EAF6FF、クリックOK
+    day.style.background = '#cae5fa';
+    day.style.cursor = 'pointer';
+
+    // 緑の●を追加
+    const dot = document.createElement('div');
+    dot.style.width = '8px';
+    dot.style.height = '8px';
+    dot.style.background = 'limegreen';
+    dot.style.borderRadius = '50%';
+    dot.style.position = 'absolute';
+    dot.style.bottom = '5px';
+    dot.style.left = '50%';
+    dot.style.transform = 'translateX(-50%)';
+    day.appendChild(dot);
+
+    // 日付クリックしたときだけ反応
+    day.onclick = () => {
+    if (selectedDayDiv !== day) {
+      // 別の日付が選ばれたときだけリスト更新する
+      if (selectedDayDiv) {
+        selectedDayDiv.style.background = '#cae5fa';
+      }
+      day.style.background = '#7cc4fc';
+      selectedDayDiv = day;
+      showTimeList(fullDate); // ここだけ新しい日付のときだけ呼ぶ
+  }
+};
+  } else {
+    // ★オンライン予定なし：色をグレー、クリック禁止
+    day.style.background = '#cccccc';  // グレー
+    day.style.opacity = '0.5';          // 少し薄くする
+    day.style.cursor = 'default';       // クリックできなさそうなカーソル
+  }
+
+  grid.appendChild(day);
+}
+
+  calendar.appendChild(grid);
+}
+
+// 日付クリック → 時間リスト表示
+function showTimeList(date) {
+  const timeListArea = document.getElementById('timeListArea');
+  const selectedDate = document.getElementById('selectedDate');
+  const timeList = document.getElementById('timeList');
+  const confirmArea = document.getElementById('confirmArea');
+
+  selectedDate.innerText = `${date} の時間帯を選択`;
+  timeList.innerHTML = '';
+  confirmArea.style.display = 'none';
+
+  for (let hour = 0; hour < 24; hour++) {
+    const hourText = `${String(hour).padStart(2, '0')}:00～${String(hour + 1).padStart(2, '0')}:00`;
+
+    const div = document.createElement('div');
+    div.innerText = hourText;
+    div.style.padding = '10px';
+    div.style.marginBottom = '5px';
+    div.style.borderRadius = '8px';
+    div.style.textAlign = 'center';
+    div.style.position = 'relative';
+
+    const schedule = onlineSchedule[date] || [];
+
+    if (schedule.includes(`${String(hour).padStart(2, '0')}:00`)) {
+      div.style.background = '#cae5fa';
+      div.style.cursor = 'pointer';
+      div.onmouseover = () => {
+  if (selectedTimeDiv !== div) {
+    div.style.background = '#cde6fa';
+  }
+};
+div.onmouseout = () => {
+  if (selectedTimeDiv !== div) {
+    div.style.background = '#cae5fa';
+  }
+};
+
+div.onclick = () => {
+  // すでに選択しているやつがあったら元に戻す
+  if (selectedTimeDiv && selectedTimeDiv !== div) {
+    selectedTimeDiv.style.background = '#cae5fa';
+    const oldSlider = selectedTimeDiv.querySelector('.minute-slider');
+    if (oldSlider) oldSlider.remove();
+  }
+
+  if (selectedTimeDiv === div) {
+    div.style.background = '#cae5fa';
+    selectedTimeDiv = null;
+    confirmArea.style.display = 'none';
+  } else {
+    div.style.background = '#7cc4fc';
+    selectedTimeDiv = div;
+    confirmArea.style.display = 'block';
+
+    // ★緑ドットを消す
+    const dot = div.querySelector('div');
+    if (dot) {
+      dot.remove();
+    }
+
+    // ★スライダー作る
+    const sliderWrapper = document.createElement('div');
+    sliderWrapper.className = 'minute-slider';
+    sliderWrapper.innerHTML = `
+      <input type="range" min="0" max="59" value="0" class="slider no-thumb" oninput="updateMinute(this)" data-hour="${String(hour).padStart(2, '0')}">
+<div class="slider-ticks">
+  <span>0</span>
+  <span>10</span>
+  <span>20</span>
+  <span>30</span>
+  <span>40</span>
+  <span>50</span>
+  <span>60</span>
+</div>
+      <div class="minute-display"></div> 
+    `;
+    div.appendChild(sliderWrapper);
+
+    // ★スライダー作ったらすぐ初期表示
+    updateMinute(sliderWrapper.querySelector('input'));
+  }
+};
+
+      const dot = document.createElement('div');
+      dot.style.width = '10px';
+      dot.style.height = '10px';
+      dot.style.background = 'limegreen';
+      dot.style.borderRadius = '50%';
+      dot.style.position = 'absolute';
+      dot.style.left = '10px';
+      dot.style.top = '50%';
+      dot.style.transform = 'translateY(-50%)';
+      div.appendChild(dot);
+    } else {
+      div.style.background = '#ccc';
+      div.style.opacity = '0.5';
+      div.style.cursor = 'default';
+
+      const cross = document.createElement('div');
+      cross.innerText = '✕';
+      cross.style.position = 'absolute';
+      cross.style.left = '10px';
+      cross.style.top = '50%';
+      cross.style.transform = 'translateY(-50%)';
+      cross.style.color = '#666';
+      cross.style.fontSize = '14px';
+      div.appendChild(cross);
+    }
+
+    timeList.appendChild(div);
+  }
+
+  timeListArea.style.display = 'block';
+}
+
+// 予約確認処理
+function confirmReservation() {
+  alert('予約が確定しました！');
+}
+
+// 【今すぐ通話】ボタン用：仮の処理
+function startCall() {
+  alert('通話を開始します！');
+}
+
+// チャットするボタン用：仮の処理
+function startChat() {
+  alert('チャット画面に移動します！');
+}
+
+function updateMinute(slider) {
+  const parentDiv = slider.parentElement;
+  const display = parentDiv.querySelector('.minute-display');
+  const selectedHour = slider.getAttribute('data-hour') || '00';
+  const startMinutes = parseInt(slider.value);
+  const serviceMinutes = parseInt(document.getElementById('timeSlider').value); // 利用時間（分）
+
+  let adjustedServiceMinutes = serviceMinutes;
+  if (startMinutes + serviceMinutes > 60) {
+    adjustedServiceMinutes = 60 - startMinutes;
+  }
+
+  const endMinutes = startMinutes + adjustedServiceMinutes;
+  const startTime = `${selectedHour}:${String(startMinutes).padStart(2, '0')}`;
+  const endTime = `${selectedHour}:${String(endMinutes).padStart(2, '0')}`;
+
+  // ★ここ追加！ スライダーを動かしても、選択色・confirmArea を必ずキープする
+  if (selectedTimeDiv) {
+    selectedTimeDiv.style.background = '#7cc4fc'; // 選択中カラーに固定
+    document.getElementById('confirmArea').style.display = 'block'; // オファーするボタンも必ず表示
+  }
+
+  // 表示を更新
+  display.innerHTML = `
+    <div style="display: flex; justify-content: center; gap: 15px; font-size: 13px; color: #FFFFFF;">
+      <div>開始時間: ${startTime}</div>
+      <div>ご利用時間: ${adjustedServiceMinutes}分</div>
+      <div>終了時間: ${endTime}</div>
+    </div>
+  `;
+
+  // スライダー背景の更新（開始時間から終了時間だけグラデーション）
+  const percentStart = (startMinutes / 60) * 100;
+  const percentEnd = (endMinutes / 60) * 100;
+
+  slider.style.background = `
+    linear-gradient(
+      to right,
+      #e0e0e0 0%,
+      #e0e0e0 ${percentStart}%,
+      #4dd0e1 ${percentStart}%,
+      #0071E3 ${percentEnd}%,
+      #e0e0e0 ${percentEnd}%,
+      #e0e0e0 100%
+    )
+  `;
+
+// スライダーから指やマウスを離しても選択状態を維持する
+slider.addEventListener('mouseup', () => {
+  if (selectedTimeDiv) {
+    selectedTimeDiv.style.background = '#7cc4fc'; // 選択中カラー
+    document.getElementById('confirmArea').style.display = 'block'; // オファーするボタン
+  }
+});
+slider.addEventListener('touchend', () => {
+  if (selectedTimeDiv) {
+    selectedTimeDiv.style.background = '#7cc4fc'; 
+    document.getElementById('confirmArea').style.display = 'block'; 
+  }
+});
+}
+// ⭐【外に独立して】renderStars関数を置く！
+function renderStars(score) {
+  const container = document.getElementById('starRating');
+  container.innerHTML = '';
+
+  const fullStars = Math.floor(score);
+  const hasHalfStar = score % 1 >= 0.25 && score % 1 <= 0.75;
+  const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+
+  for (let i = 0; i < fullStars; i++) {
+    const star = document.createElement('div');
+    star.className = 'star';
+    star.innerText = '★';
+    container.appendChild(star);
+  }
+
+  if (hasHalfStar) {
+    const halfStar = document.createElement('div');
+    halfStar.className = 'star half';
+    halfStar.innerText = '★';
+    container.appendChild(halfStar);
+  }
+
+  for (let i = 0; i < emptyStars; i++) {
+    const star = document.createElement('div');
+    star.className = 'star empty';
+    star.innerText = '★';
+    container.appendChild(star);
+  }
+}
+
+// 実行（例えば4.3の場合）
+renderStars(4.3);
+
+function toggleCallButton() {
+  const button = document.querySelector('.call-button');
+  button.classList.toggle('active');
+}
+</script>
+
+</body>
+</html>
